@@ -1,0 +1,53 @@
+---
+
+- name: Delete user projects
+  k8s:
+    name: testing-workspace-user{{ item }}
+    api_version: v1
+    kind: Namespace
+    state: absent
+  loop: "{{ range(1, number_of_users + 1) | list }}"
+
+# - name: Delete Che ClusterServiceVersion
+#   k8s:
+#     name: crwoperator.v2.0.0
+#     api_version: operators.coreos.com/v1alpha1
+#     kind: ClusterServiceVersion
+#     state: absent
+
+# Delete the guides:
+- name: Delete Guide-M1 DeploymentConfig
+  k8s:
+    name: "guides-{{ item }}"
+    api_version: apps.openshift.io/v1
+    kind: DeploymentConfig
+    namespace: "{{ meta.namespace }}"
+    state: absent
+  loop:
+     - m1
+     - m2
+     - m3
+
+- name: Delete Guide-M1 Service
+  k8s:
+    name: "guides-{{ item }}"
+    api_version: v1
+    kind: Service
+    namespace: "{{ meta.namespace }}"
+    state: absent
+  loop:
+     - m1
+     - m2
+     - m3
+
+- name: Delete Guide Route
+  k8s:
+    name: "guides-{{ item }}"
+    api_version: route.openshift.io/v1
+    kind: Route
+    namespace: "{{ meta.namespace }}"
+    state: absent
+  loop:
+     - m1
+     - m2
+     - m3

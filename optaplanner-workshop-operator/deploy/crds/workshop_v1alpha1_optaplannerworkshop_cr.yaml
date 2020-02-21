@@ -1,0 +1,7 @@
+apiVersion: workshop.optaplanner.org/v1alpha1
+kind: OptaPlannerWorkshop
+metadata:
+  name: ddoyle-example-optaplannerworkshop
+spec:
+  # Add fields here
+  size: 1

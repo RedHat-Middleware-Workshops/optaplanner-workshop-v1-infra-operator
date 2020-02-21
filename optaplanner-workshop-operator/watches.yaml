@@ -1,0 +1,7 @@
+---
+- version: v1alpha1
+  group: workshop.optaplanner.org
+  kind: OptaPlannerWorkshop
+  role: /opt/ansible/roles/optaplannerworkshop
+# Disables status managed. Note that with status management enabled, we can still provide extra status updates using k8s_status
+#  manageStatus: false

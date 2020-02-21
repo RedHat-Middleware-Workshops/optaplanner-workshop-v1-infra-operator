@@ -1,0 +1,11 @@
+---
+- version: v1alpha1
+  group: workshop.optaplanner.org
+  kind: OptaPlannerWorkshop
+  role: /opt/ansible/roles/optaplannerworkshop
+  reconcilePeriod: 60s
+  finalizer:
+    name: finalizer.workshop.optaplanner.org
+    role: /opt/ansible/roles/remove_projects
+    vars:
+      state: absent

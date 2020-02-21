@@ -1,0 +1,117 @@
+---
+# tasks file for optaplannerworkshop
+
+# Finalizers. Required when needing custom delete logic on CR removal: https://github.com/operator-framework/operator-sdk/blob/master/doc/ansible/dev/finalizers.md
+
+# All K8S resources created by an Operator will be removed when the operator is undeployed.
+
+# TODO: This is just a first example ...
+- name: start memcached
+  k8s:
+    definition:
+      kind: Deployment
+      apiVersion: apps/v1
+      metadata:
+        name: '{{ meta.name }}-memcached'
+        namespace: '{{ meta.namespace }}'
+      spec:
+        replicas: "{{size}}"
+        selector:
+          matchLabels:
+            app: memcached
+        template:
+          metadata:
+            labels:
+              app: memcached
+          spec:
+            containers:
+            - name: memcached
+              command:
+              - memcached
+              - -m=64
+              - -o
+              - modern
+              - -v
+              image: "docker.io/memcached:1.4.36-alpine"
+              ports:
+                - containerPort: 11211
+
+# Example of adding custom status information to the OptaPlannerWorkshop CR.
+- k8s_status:
+    api_version: workshop.optaplanner.org/v1alpha1
+    kind: OptaPlannerWorkshop
+    name: "{{ meta.name }}"
+    namespace: "{{ meta.namespace }}"
+    status:
+      foo: bar
+      ddoyle: test
+
+- name: Create OperatorGroup
+  k8s:
+    definition:
+      apiVersion: operators.coreos.com/v1
+      kind: OperatorGroup
+      metadata:
+        annotations:
+          olm.providedAPIs: CheCluster.v1.org.eclipse.che
+# The generateName doesn't work ... but that would cause problems during reconciliation anyway ...
+# So we provide a name we generate from the operator metadata.
+#        generateName: "{{ meta.namespace }}-"
+        name: "{{ meta.namespace }}-redhat"
+        namespace: "{{ meta.namespace }}"
+        generation: 1
+      spec:
+        targetNamespaces:
+        - "{{ meta.namespace }}"
+
+- name: Create CRW Operator Subscription
+  k8s:
+    definition:
+      apiVersion: operators.coreos.com/v1alpha1
+      kind: Subscription
+      metadata:
+        generation: 1
+        name: codeready-workspaces
+        namespace: "{{ meta.namespace }}"
+      spec:
+        channel: latest
+        installPlanApproval: Automatic
+        name: codeready-workspaces
+        source: redhat-operators
+        sourceNamespace: openshift-marketplace
+        startingCSV: crwoperator.v2.0.0
+
+- name: Create Che Cluster
+  k8s:
+    definition:
+      apiVersion: org.eclipse.che/v1
+      kind: CheCluster
+      metadata:
+        name: codeready-workspaces
+        namespace: "{{ meta.namespace }}"
+      spec:
+        server:
+          cheImageTag: ''
+          cheFlavor: codeready
+          devfileRegistryImage: ''
+          pluginRegistryImage: ''
+          tlsSupport: false
+          selfSignedCert: false
+        database:
+          externalDb: false
+          chePostgresHostName: ''
+          chePostgresPort: ''
+          chePostgresUser: ''
+          chePostgresPassword: ''
+          chePostgresDb: ''
+        auth:
+          openShiftoAuth: true
+          identityProviderImage: ''
+          externalIdentityProvider: false
+          identityProviderURL: ''
+          identityProviderRealm: ''
+          identityProviderClientId: ''
+        storage:
+          pvcStrategy: per-workspace
+          pvcClaimSize: 1Gi
+          preCreateSubPaths: true

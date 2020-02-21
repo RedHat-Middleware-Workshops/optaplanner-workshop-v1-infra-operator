@@ -1,0 +1,203 @@
+---
+# tasks file for optaplannerworkshop
+
+# Finalizers. Required when needing custom delete logic on CR removal: https://github.com/operator-framework/operator-sdk/blob/master/doc/ansible/dev/finalizers.md
+
+# All K8S resources created by an Operator will be removed when the operator is undeployed.
+
+# TODO: This is just a first example ...
+#- name: start memcached
+#  k8s:
+#    definition:
+#      kind: Deployment
+#      apiVersion: apps/v1
+#      metadata:
+#        name: '{{ meta.name }}-memcached'
+#        namespace: '{{ meta.namespace }}'
+#      spec:
+#        replicas: "{{size}}"
+#        selector:
+#          matchLabels:
+#            app: memcached
+#        template:
+#          metadata:
+#            labels:
+#              app: memcached
+#          spec:
+#            containers:
+#            - name: memcached
+#              command:
+#              - memcached
+#              - -m=64
+#              - -o
+#              - modern
+#              - -v
+#              image: "docker.io/memcached:1.4.36-alpine"
+#              ports:
+#                - containerPort: 11211
+
+# Example of adding custom status information to the OptaPlannerWorkshop CR.
+
+
+- import_role:
+    name: siamaksade.openshift_workshopper
+    allow_duplicates: true
+  vars:
+    workshopper_name: guides-m1
+    project_name: "{{ meta.namespace }}"
+    workshopper_content_url_prefix: "https://raw.githubusercontent.com/{{ github_account }}/optaplanner-workshop-v1m1-guides/{{ github_ref }}"
+    workshopper_workshop_urls: "https://raw.githubusercontent.com/{{ github_account }}/optaplanner-workshop-v1m1-guides/{{ github_ref }}/_optaplanner-workshop-module1.yml"
+    workshopper_env_vars:
+      PROJECT_SUFFIX: "{{ project_suffix }}"
+      #COOLSTORE_PROJECT: coolstore{{ project_suffix }}
+      OPENSHIFT_CONSOLE_URL: "{{ openshift_master_url }}"
+      #ECLIPSE_CHE_URL: http://che-{{ namespace }}.{{ apps_hostname_suffix }}
+      #GIT_URL: http://gogs-{{ namespace }}.{{ apps_hostname_suffix }}
+      NEXUS_URL: http://nexus-{{ meta.namespace }}.{{ apps_hostname_suffix }}
+# TODO: Make this dynamic
+#  when: modules is search("m1")
+  tags: guides
+
+- import_role:
+    name: siamaksade.openshift_workshopper
+    allow_duplicates: true
+  vars:
+    workshopper_name: guides-m2
+    project_name: "{{ meta.namespace }}"
+    workshopper_content_url_prefix: "https://raw.githubusercontent.com/{{ github_account }}/optaplanner-workshop-v1m2-guides/{{ github_ref }}"
+    workshopper_workshop_urls: "https://raw.githubusercontent.com/{{ github_account }}/optaplanner-workshop-v1m2-guides/{{ github_ref }}/_optaplanner-workshop-module2.yml"
+    workshopper_env_vars:
+      PROJECT_SUFFIX: "{{ project_suffix }}"
+      #COOLSTORE_PROJECT: coolstore{{ project_suffix }}
+      OPENSHIFT_CONSOLE_URL: "{{ openshift_master_url }}"
+      #ECLIPSE_CHE_URL: http://che-{{ namespace }}.{{ apps_hostname_suffix }}
+      #GIT_URL: http://gogs-{{ namespace }}.{{ apps_hostname_suffix }}
+      NEXUS_URL: http://nexus-{{ meta.namespace }}.{{ apps_hostname_suffix }}
+# TODO: Make this dynamic
+#  when: modules is search("m2")
+  tags: guides
+
+- import_role:
+    name: siamaksade.openshift_workshopper
+    allow_duplicates: true
+  vars:
+    workshopper_name: guides-m3
+    project_name: "{{ meta.namespace }}"
+    workshopper_content_url_prefix: "https://raw.githubusercontent.com/{{ github_account }}/optaplanner-workshop-v1m3-guides/{{ github_ref }}"
+    workshopper_workshop_urls: "https://raw.githubusercontent.com/{{ github_account }}/optaplanner-workshop-v1m3-guides/{{ github_ref }}/_optaplanner-workshop-module3.yml"
+    workshopper_env_vars:
+      PROJECT_SUFFIX: "{{ project_suffix }}"
+      #COOLSTORE_PROJECT: coolstore{{ project_suffix }}
+      OPENSHIFT_CONSOLE_URL: "{{ openshift_master_url }}"
+      #ECLIPSE_CHE_URL: http://che-{{ namespace }}.{{ apps_hostname_suffix }}
+      #GIT_URL: http://gogs-{{ namespace }}.{{ apps_hostname_suffix }}
+      NEXUS_URL: http://nexus-{{ meta.namespace }}.{{ apps_hostname_suffix }}
+# TODO: Make this dynamic
+#  when: modules is search("m3")
+  tags: guides
+
+
+
+
+# Custom status
+# - k8s_status:
+#     api_version: workshop.optaplanner.org/v1alpha1
+#     kind: OptaPlannerWorkshop
+#     name: "{{ meta.name }}"
+#     namespace: "{{ meta.namespace }}"
+#     status:
+#       foo: bar
+#       ddoyle: test
+
+## This works properly. Just commmenting out for testing.
+# - name: Create OperatorGroup
+#   k8s:
+#     definition:
+#       apiVersion: operators.coreos.com/v1
+#       kind: OperatorGroup
+#       metadata:
+#         annotations:
+#           olm.providedAPIs: CheCluster.v1.org.eclipse.che
+# # The generateName doesn't work ... but that would cause problems during reconciliation anyway ...
+# # So we provide a name we generate from the operator metadata.
+# #        generateName: "{{ meta.namespace }}-"
+#         name: "{{ meta.namespace }}-redhat"
+#         namespace: "{{ meta.namespace }}"
+#         generation: 1
+#       spec:
+#         targetNamespaces:
+#         - "{{ meta.namespace }}"
+
+## This works properly. Just commenting out for testing.
+# - name: Create CRW Operator Subscription
+#   k8s:
+#     definition:
+#       apiVersion: operators.coreos.com/v1alpha1
+#       kind: Subscription
+#       metadata:
+#         generation: 1
+#         name: codeready-workspaces
+#         namespace: "{{ meta.namespace }}"
+#       spec:
+#         channel: latest
+#         installPlanApproval: Automatic
+#         name: codeready-workspaces
+#         source: redhat-operators
+#         sourceNamespace: openshift-marketplace
+#         startingCSV: crwoperator.v2.0.0
+
+## This works properly. Just commenting out for testing.
+# - name: Create Che Cluster
+#   k8s:
+#     definition:
+#       apiVersion: org.eclipse.che/v1
+#       kind: CheCluster
+#       metadata:
+#         finalizers:
+#           - oauthclients.finalizers.che.eclipse.org
+# #        generation: 18
+#         name: codeready-workspaces
+#         namespace: "{{ meta.namespace }}"
+# #        resourceVersion: '380510'
+#       spec:
+#         auth:
+#           identityProviderURL: "http://keycloak-{{ meta.namespace }}.apps-crc.testing"
+#           identityProviderRealm: codeready
+#           updateAdminPassword: false
+#           identityProviderPostgresPassword: QZZGMjte1Z5F
+#           oAuthSecret: 0m7pakR2Y60o
+#           identityProviderPassword: jTODQ0qumYno
+#           oAuthClientName: codeready-workspaces-openshift-identity-provider-hot6sd
+#           identityProviderClientId: codeready-public
+#           identityProviderAdminUserName: admin
+#           externalIdentityProvider: false
+#           openShiftoAuth: true
+#         database:
+#           chePostgresDb: dbche
+#           chePostgresHostName: postgres
+#           chePostgresPassword: s7mimtyBIiVR
+#           chePostgresPort: '5432'
+#           chePostgresUser: pgche
+#           externalDb: false
+#         k8s: {}
+#         server:
+#           cheDebug: 'false'
+#           cheFlavor: codeready
+#           cheHost: "codeready-{{ meta.namespace }}.apps-crc.testing"
+#           cheLogLevel: INFO
+#           externalDevfileRegistry: false
+#           externalPluginRegistry: false
+#           selfSignedCert: false
+#           tlsSupport: false
+#         storage:
+#           preCreateSubPaths: true
+#           pvcClaimSize: 1Gi
+#           pvcStrategy: per-workspace
+
+- name: Create user projects
+  k8s:
+    name: testing-workspace-user{{ item }}
+    api_version: v1
+    kind: Namespace
+    state: present
+  loop: "{{ range(1, number_of_users + 1) | list }}"

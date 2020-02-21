@@ -1,0 +1,12 @@
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: optaplanner-workshop-cluster-operator
+subjects:
+- kind: ServiceAccount
+  name: optaplanner-workshop-cluster-operator
+  namespace: optaplanner-workshop
+roleRef:
+  kind: ClusterRole
+  name: optaplanner-workshop-cluster-operator
+  apiGroup: rbac.authorization.k8s.io

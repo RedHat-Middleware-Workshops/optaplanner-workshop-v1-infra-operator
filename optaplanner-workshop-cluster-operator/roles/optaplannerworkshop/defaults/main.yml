@@ -1,0 +1,12 @@
+---
+# defaults file for optaplannerworkshop
+
+size: 1
+number_of_users: 10
+
+github_account: RedHat-Middleware-Workshops
+github_ref: master
+project_suffix: "-XX"
+
+openshift_master_url: "http://codeready-optaplanner-workshop.apps-crc.testing/"
+apps_hostname_suffix: "apps-crc.testing"
